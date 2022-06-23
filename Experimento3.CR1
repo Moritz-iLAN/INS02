@@ -1,0 +1,47 @@
+'CR1000 Series Datalogger
+'To create a different opening program template, type in new
+'instructions and select Template | Save as Default Template
+'date:
+'program author: Ana
+
+'Declare Public Variables
+'Example:
+Public PTemp, batt_volt
+Public termopar,PT100, Rs, Vs
+Const Vx=2000 'tensao de referencia'
+Const Rf=10000 'repositor de referencia 10km'
+
+DataTable (saida1min,1,1000)
+	DataInterval (0,1,Min,10)
+	Minimum (1,batt_volt,FP2,0,False)
+	Sample (1,PTemp,FP2)
+	Average (1,termopar,FP2,False)
+	Average (1,PT100,FP2,False)
+	Average (1,Rs,FP2,False)
+EndTable
+
+DataTable (saida1s,1,1000)
+	DataInterval (0,1,Sec,10)
+	Minimum (1,batt_volt,FP2,0,False)
+	Sample (1,PTemp,FP2)
+	Average (1,termopar,FP2,False)
+	Average (1,PT100,FP2,False)
+	Average (1,Rs,FP2,False)
+EndTable
+
+'Main Program
+BeginProg
+	Scan (1,Sec,0,0)
+		PanelTemp (PTemp,250)
+		Battery (batt_volt)
+		TCDiff (termopar,1,mV2_5C,2,TypeK,PTemp,True ,0,250,1.0,0)
+				ExciteV (Vx1,2000,0)
+				VoltSe (Vs,1,mV250,1,1,0,250,1.0,0)
+				Rs=Rf*(Vs/(Vx-Vs))-1.565
+				PT100=(Rs/100-1)/0.00385
+		
+		CallTable saida1min
+		CallTable saida1s
+	NextScan
+EndProg
+
